@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.ssm.dao.AdminDao">
+
+    <resultMap id="adminMap" type="Admin">
+        <id property="a_id" column="a_id"></id>
+        <result property="a_name" column="a_name"></result>
+        <result property="a_password" column="a_password"></result>
+    </resultMap>
+
+    <!-- 登录的功能 -->
+    <select id="login" resultMap="adminMap" parameterType="string">
+        select * from admin where a_name = #{a_name}
+    </select>
+
+    <!-- 注册的功能 -->
+    <insert id="insert" parameterType="Admin">
+        insert into admin values(null,#{a_name},#{a_password})
+    </insert>
+
+
+    <!-- 根据用户名查询 -->
+    <select id="findByName" parameterType="string" resultMap="adminMap">
+        select * from admin where a_name = #{a_name}
+    </select>
+</mapper>

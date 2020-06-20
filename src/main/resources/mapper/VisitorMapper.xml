@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.ssm.dao.VisitorDao">
+
+    <resultMap id="visitorMap" type="Visitor">
+        <id property="v_id" column="v_id"></id>
+        <result property="v_username" column="v_username"></result>
+        <result property="v_password" column="v_password"></result>
+    </resultMap>
+
+    <!-- 登录的功能 -->
+    <select id="login" resultMap="visitorMap" parameterType="Visitor">
+        select * from visitor where v_username = #{v_username} and v_password = #{v_password}
+    </select>
+
+    <!-- 注册的功能 -->
+    <insert id="insert" parameterType="Visitor">
+        insert into visitor values(null,#{v_username},#{v_password})
+    </insert>
+
+    <!-- 根据用户名查询 -->
+    <select id="findByName" parameterType="string" resultMap="visitorMap">
+        select * from visitor where v_username = #{username}
+    </select>
+</mapper>

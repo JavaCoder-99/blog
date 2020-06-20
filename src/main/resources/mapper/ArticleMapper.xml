@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.ssm.dao.ArticleDao">
+
+    <resultMap id="articleMap" type="Article">
+        <id property="r_id" column="r_id" jdbcType="INTEGER"/>
+        <result property="r_author" column="r_author" jdbcType="VARCHAR"/>
+        <result property="r_summary" column="r_summary" jdbcType="VARCHAR"/>
+        <result property="r_content" column="r_content" jdbcType="VARCHAR"/>
+        <result property="r_date" column="r_date" jdbcType="VARCHAR"/>
+        <result property="r_verify" column="r_verify" jdbcType="INTEGER"/>
+        <result property="r_publish" column="r_publish" jdbcType="INTEGER"/>
+        <result property="r_status" column="r_status" jdbcType="INTEGER"/>
+        <result property="r_words" column="r_words" jdbcType="INTEGER"/>
+        <result property="r_views" column="r_views" jdbcType="INTEGER"/>
+        <result property="r_goods" column="r_goods" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <resultMap id="wordsMap" type="Words">
+        <id column="lw_id" property="lw_id" jdbcType="INTEGER"/>
+        <result column="lw_name" property="lw_name" jdbcType="VARCHAR"/>
+        <result column="lw_date" property="lw_date" jdbcType="VARCHAR"/>
+        <result column="lw_content" property="lw_content" jdbcType="VARCHAR"/>
+        <result column="lw_for_name" property="lw_for_name" jdbcType="VARCHAR"/>
+        <result column="lw_for_article_id" property="lw_for_article_id" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <resultMap id="replyMap" type="Reply">
+        <id column="lr_id" property="lr_id" jdbcType="INTEGER"/>
+        <result column="lr_name" property="lr_name" jdbcType="VARCHAR"/>
+        <result column="lr_date" property="lr_date" jdbcType="VARCHAR"/>
+        <result column="lr_content" property="lr_content" jdbcType="VARCHAR"/>
+        <result column="lr_for_name" property="lr_for_name" jdbcType="VARCHAR"/>
+        <result column="lr_for_words" property="lr_for_words" jdbcType="VARCHAR"/>
+        <result column="lr_for_article_id" property="lr_for_article_id" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!-- 分页查询 不在回收站的 -->
+    <select id="findByPage" resultMap="articleMap">
+        select * from article where r_status = 0
+    </select>
+
+    <!-- 根据ID查询 -->
+    <select id="findById" resultMap="articleMap" parameterType="integer">
+        select * from article where r_id = #{r_id}
+    </select>
+
+    <!-- 查询所有留言信息 -->
+    <select id="findByWords" resultMap="wordsMap">
+        select * from words where lw_for_article_id = #{r_id}
+    </select>
+
+    <!-- 查询所有回复信息 -->
+    <select id="findByReply" resultMap="replyMap">
+        select * from reply where lr_for_article_id = #{r_id}
+    </select>
+
+    <!-- 保存留言信息 -->
+    <insert id="saveWords" parameterType="Words">
+        insert into words values(
+          null,
+          #{lw_name},
+          #{lw_date},
+          #{lw_content},
+          #{lw_for_name},
+          #{lw_for_article_id}
+        )
+    </insert>
+
+    <!-- 保存回复信息 -->
+    <insert id="saveReply" parameterType="Reply">
+        insert into reply values (
+          null,
+          #{lr_name},
+          #{lr_date},
+          #{lr_content},
+          #{lr_for_name},
+          #{lr_for_words},
+          #{lr_for_reply},
+          #{lr_for_article_id}
+        )
+    </insert>
+
+    <!-- 保存文章信息 -->
+    <insert id="saveArticle" parameterType="Article">
+        insert into article () values (
+          null,
+          #{r_author},
+          #{r_summary},
+          #{r_content},
+          #{r_date},
+          #{r_verify},
+          #{r_publish},
+          #{r_status}
+        )
+    </insert>
+
+    <!-- 文章删除功能（仅把文章放入到回收站） -->
+    <update id="clean" parameterType="integer">
+        update article set r_status = 1 where r_id =#{r_id}
+    </update>
+
+    <!-- 更新功能 -->
+    <update id="update" parameterType="Article">
+        update article set
+          r_id        = #{r_id},
+          r_author    = #{r_author},
+          r_summary   = #{r_summary},
+          r_content   = #{r_content},
+          r_date      = #{r_date},
+          r_verify    = #{r_verify},
+          r_publish   = #{r_publish},
+          r_status    = #{r_status}
+        where r_id = #{r_id}
+    </update>
+
+    <!-- 分页查询 回收站的 -->
+    <select id="findByTrash" resultMap="articleMap">
+        select * from article where r_status = 1
+    </select>
+
+    <!-- 恢复文章的功能（将文章从回收站中移除，即仅仅改变status的值即可） -->
+    <update id="restore" parameterType="integer">
+        update article set r_status = 0 where r_id = #{r_id}
+    </update>
+
+    <!-- 删除功能（永久删除信息） -->
+    <delete id="delete" parameterType="integer">
+        delete from article where r_id = #{r_id}
+    </delete>
+
+    <!--条件查询-->
+    <select id="findByCondition" parameterType="Article" resultMap="articleMap">
+        select * from article
+        <where>
+            <if test="r_author !=''">
+                and r_author = #{r_author}
+            </if>
+            <if test="r_verify != null">
+                and r_verify = #{r_verify}
+            </if>
+            <if test="r_publish != null">
+                and r_publish = #{r_publish}
+            </if>
+            <if test="r_status != null">
+                and r_status = #{r_status}
+            </if>
+        </where>
+
+    </select>
+
+    <!-- 分页查询 所有发布文章 按新排序-->
+    <select id="queryAllPub" resultMap="articleMap">
+        select * from article  where r_publish = 1 and r_status = 0 order by r_id desc
+    </select>
+
+    <!--留言数量-->
+    <select id="getWordsNum" resultType="integer">
+        select count(*) from words
+    </select>
+
+    <!--回复数量-->
+    <select id="getReplyNum" resultType="integer">
+        select count(*) from reply
+    </select>
+
+    <!--最新留言-->
+    <select id="LatestMessage" resultMap="wordsMap">
+        select * from words order by lw_id desc limit 8
+    </select>
+
+    <!--最近发布-->
+    <select id="recentlyReleased" resultMap="articleMap">
+        select * from article where r_publish = 1 and r_status = 0 order by r_id  desc limit 8
+    </select>
+
+    <!--流量+1-->
+    <update id="flow" parameterType="integer">
+        update article set r_views = r_views + 1 where r_id = #{r_id}
+    </update>
+
+    <!--点赞+1-->
+    <update id="good" parameterType="integer">
+        update article set r_goods = r_goods + 1 where r_id = #{r_id}
+    </update>
+</mapper>
